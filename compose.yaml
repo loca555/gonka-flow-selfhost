@@ -1,0 +1,61 @@
+name: ${STACK_NAME:-gonka-flow-ipfs-copy}
+
+services:
+  flow:
+    image: ${FLOW_IMAGE:?Set FLOW_IMAGE in .env}
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8000"
+      APP_MODE: mints
+      DATA_DIR: /data/flow
+      INDEXER_ENABLED: "true"
+      LOAD_SEED_ARCHIVE: "true"
+      SNAPSHOT_RESTORE: "false"
+      KEEP_ALIVE_ENABLED: "false"
+      OTC_LOCAL_ENABLED: "false"
+      POLL_SECONDS: "60"
+      ETH_RPC_URLS: https://ethereum-rpc.publicnode.com,https://rpc.mevblocker.io
+      ETH_ARCHIVE_RPC_URLS: https://ethereum-rpc.publicnode.com,https://rpc.mevblocker.io
+      ETH_RPC_INTERVAL: "1.0"
+      ETH_HISTORY_BATCH: "1000"
+    volumes:
+      - flow-data:/data
+
+  ipfs:
+    image: ${IPFS_IMAGE:?Set IPFS_IMAGE in .env}
+    restart: unless-stopped
+    environment:
+      IPFS_PROFILE: server
+      FLOW_DOMAIN: ${FLOW_DOMAIN:?Set FLOW_DOMAIN in .env}
+    command: [daemon, --migrate=true, --enable-gc]
+    ports:
+      - "4001:4001/tcp"
+      - "4001:4001/udp"
+    volumes:
+      - ipfs-data:/data/ipfs
+      - ./exports:/export:ro
+      - ./init-ipfs.sh:/container-init.d/001-flow.sh:ro
+
+  caddy:
+    image: ${CADDY_IMAGE:?Set CADDY_IMAGE in .env}
+    restart: unless-stopped
+    environment:
+      FLOW_DOMAIN: ${FLOW_DOMAIN:?Set FLOW_DOMAIN in .env}
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - flow
+      - ipfs
+
+volumes:
+  flow-data:
+  ipfs-data:
+  caddy-data:
+  caddy-config:

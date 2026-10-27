@@ -1,0 +1,8 @@
+.env
+source-*/
+exports/
+backups/
+.checks/
+__pycache__/
+*.zip
+*.zip.sha256

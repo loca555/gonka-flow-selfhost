@@ -1,0 +1,22 @@
+{$FLOW_DOMAIN} {
+    encode zstd gzip
+    @blocked path /api/v0 /api/v0/* /ipfs /ipfs/* /ipns /ipns/* /webui /webui/*
+    @flow_api path /api /api/* /healthz
+
+    route {
+        handle @blocked {
+            respond 404
+        }
+
+        handle @flow_api {
+            reverse_proxy flow:8000
+        }
+
+        handle {
+            reverse_proxy ipfs:8080 {
+                header_up Host {$FLOW_DOMAIN}
+                header_up X-Forwarded-Proto https
+            }
+        }
+    }
+}
