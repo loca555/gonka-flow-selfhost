@@ -5,7 +5,7 @@ from pathlib import Path
 import sqlite3
 
 base = Path('/data/flow')
-source = base / 'wgnk.sqlite3'
+source = base / 'gonka-flow.sqlite3'
 if not source.is_file():
     raise RuntimeError('Flow database does not exist yet')
 directory = base / 'backups'

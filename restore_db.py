@@ -12,8 +12,8 @@ base = Path('/data/flow')
 if base.is_symlink():
     raise RuntimeError('Data directory must not be a symlink')
 base.mkdir(mode=0o700, parents=True, exist_ok=True)
-target = base / 'wgnk.sqlite3'
-if any((base / name).exists() for name in ('wgnk.sqlite3', 'wgnk.sqlite3-wal', 'wgnk.sqlite3-shm')):
+target = base / 'gonka-flow.sqlite3'
+if any((base / name).exists() for name in ('gonka-flow.sqlite3', 'gonka-flow.sqlite3-wal', 'gonka-flow.sqlite3-shm')):
     raise RuntimeError('Restore is allowed only into an empty database location')
 temporary = base / ('.restore-' + uuid.uuid4().hex + '.sqlite3')
 with sqlite3.connect(source.as_uri() + '?mode=ro', uri=True) as src:
